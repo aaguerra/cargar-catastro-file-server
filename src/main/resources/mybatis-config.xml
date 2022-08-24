@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <typeAliases>
+        <typeAlias type="entity.ArchivoDescargadoSri" alias="ArchivoDescargadoSri"/>
+    </typeAliases>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="configuracion.HikariDataSourceFactory">
+<!--                <property name="dataSourceClassName" value="org.postgresql.ds.PGSimpleDataSource"/>-->
+<!--                <property name="jdbcUrl" value="jdbc:postgresql://192.168.88.110:5432/sistema_contable_erp"/>-->
+<!--                <property name="dataSource.databaseName" value="sistema_contable_erp"/>-->
+<!--                <property name="serverName" value="192.168.88.110"/>-->
+<!--                <property name="portNumber" value="5432"/>-->
+<!--                <property name="username" value="postgres"/>-->
+<!--                <property name="password" value="@00bc5c68b0fa2c8ff6e27aa"/>-->
+<!--                <property name="maximumPoolSize" value="10"/>-->
+<!--                <property name="minimumIdle" value="5"/>-->
+            </dataSource>
+<!--            <dataSource type="POOLED">-->
+<!--                <property name="driver" value="org.postgresql.Driver"/>-->
+<!--                <property name="url" value="jdbc:postgresql://192.168.88.110:5432/sistema_contable_erp"/>-->
+<!--                <property name="username" value="postgres"/>-->
+<!--                <property name="password" value="@00bc5c68b0fa2c8ff6e27aa"/>-->
+<!--            </dataSource>-->
+        </environment>
+    </environments>
+    <mappers>
+        
+        <mapper resource = "mappers/ArchivoDescargadoSri.xml"/>
+    </mappers>
+</configuration>
+
+

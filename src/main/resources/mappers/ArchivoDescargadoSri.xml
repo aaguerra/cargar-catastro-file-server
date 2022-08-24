@@ -1,0 +1,25 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace = "entity.ArchivoDescargadoSri">
+
+    <resultMap id = "result" type = "entity.ArchivoDescargadoSri">
+        <result property = "xmlBase" column = "XmlComprobanteFacturaAutorizado"/>        
+        <result property = "id" column = "IdComprobante"/>                            
+        <result property = "claveAcceso" column = "ClaveAcceso"/>         
+        <result property = "xmlBaseByte" javaType="_byte[]" column = "XML_RESPUESTA_COMPROBACION"/>            
+    </resultMap>
+
+    <select id = "findForProcesar" resultMap = "result" >
+        SELECT top 1000 IdComprobante, XmlComprobanteFacturaAutorizado , ClaveAcceso
+        FROM TempoElectronica.dbo.tbComprobanteFacturaM where procesado != 1 or procesado is null;
+    </select>
+    
+    <update id="actualizar" parameterType = "entity.ArchivoDescargadoSri">
+        UPDATE TempoElectronica.dbo.tbComprobanteFacturaM
+        SET   procesado=1
+        WHERE IdComprobante= #{id};
+    </update>
+    
+</mapper>
