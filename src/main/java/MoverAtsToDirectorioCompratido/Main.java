@@ -77,42 +77,21 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        
-        /*try {
-            UnirestInstance unirest = Unirest.primaryInstance();
-            // It can be configured and used just like the static context
-            unirest.config().socketTimeout(60000).connectTimeout(60000);
-            
-            //ystem.out.println("---------------" + source.getName());
-            System.out.println("---------------" + Main.getPropiedad("urlServidorFile"));
-            System.out.println("---------------" + Main.getPropiedad("urlServidorFileCatastros"));
-            //System.out.println("---------------" + ruta);
-            /*HttpResponse<String> response_ = unirest.post(Main.getPropiedad("urlServidorFile"))
-                    .field("file", new File("/C:/ATS/enviar/catastros/31acbd2c-269d-4ac7-8273-d7e9481eb17c_AZUAY.txt")) 
-                    .field("fileName", source.getName())
-                    .field("filePath", sSourceLocation)
-                    .asString();
-            //Unirest.setTimeouts(0, 0);
-             *
-            HttpResponse<String> response_ = Unirest.post(Main.getPropiedad("urlServidorFile"))
-                    //.field("file", new File("/C:/ATS/enviar/catastros/31acbd2c-269d-4ac7-8273-d7e9481eb17c_AZUAY.txt"))
-                    .field("file", new File("/C:/Users/USUARIO/Downloads/AZUAY/AZUAY.txt"))
-                    .field("fileName", "31acbd2c-269d-4ac7-8273-d7e9481eb17c_AZUAY.txt")
-                    .field("filePath", Main.getPropiedad("urlServidorFileCatastros"))
-                    .asString();
 
-            System.out.println("---------------" + response_.getStatus());
-            
-        } catch (Exception e) {
-
-            LOGGER.log(Level.SEVERE, null, e);
-            
-        }*/
         init(
                 Main.getPropiedad("rutaFuenteCatastros"),
                 Main.getPropiedad("rutaPorProcesarCatastros"),
                 Main.getPropiedad("rutaProcesadoCatastros"),
-                Main.getPropiedad("urlServidorFileCatastros")
+                Main.getPropiedad("urlServidorFileCatastros"),
+                Integer.parseInt(Main.getPropiedad("urlApiDataTipoCatastro"))
+        );
+
+        init(
+                Main.getPropiedad("rutaFuenteAgenteRetencion"),
+                Main.getPropiedad("rutaPorProcesarAgenteRetencion"),
+                Main.getPropiedad("rutaProcesadoAgenteRetencion"),
+                Main.getPropiedad("urlServidorFileAgenteRetencion"),
+                Integer.parseInt(Main.getPropiedad("urlApiDataTipoAgenteRetencion"))
         );
 
     }
@@ -121,17 +100,20 @@ public class Main {
             String rutaFuente,
             String rutaPorProcesar,
             String rutaProcesado,
-            String rutaFileServer
+            String rutaFileServer,
+            Integer tipoFileSri
     ) {
 
         System.out.println("rutaFuente=" + rutaFuente);
         System.out.println("rutaPorProcesar=" + rutaPorProcesar);
         System.out.println("rutaProcesado=" + rutaProcesado);
         System.out.println("rutaFileServer=" + rutaFileServer);
+        System.out.println("tipoFileSri=" + tipoFileSri);
         LOGGER.info("rutaFuente=" + rutaFuente);
         LOGGER.info("rutaPorProcesar=" + rutaPorProcesar);
         LOGGER.info("rutaProcesado=" + rutaProcesado);
         LOGGER.info("rutaFileServer=" + rutaFileServer);
+        LOGGER.info("tipoFileSri=" + tipoFileSri);
         procesarDirectorio(
                 rutaFuente,
                 rutaPorProcesar
@@ -139,21 +121,30 @@ public class Main {
         loadFile(
                 rutaPorProcesar,
                 rutaProcesado,
-                rutaFileServer
+                rutaFileServer,
+                tipoFileSri
         );
     }
 
-    public static void loadFile(String rutaPorProcesar, String rutaProcesado, String rutaFileServer) {
+    public static void loadFile(String rutaPorProcesar, String rutaProcesado, String rutaFileServer, Integer tipoFileSri ) {
         try {
             Set<String> lista = listFilesUsingFileWalkAndVisitor(rutaPorProcesar);
 
             lista.forEach(a -> {
                 System.out.println(a);
                 try {
-                    if (SendFileRepository(
-                            new File(rutaPorProcesar + File.separator + a),
-                            rutaFileServer)) {
-                        //moveFile(rutaPorProcesar + File.separator + a, rutaProcesado + File.separator + a);
+                    String[] data = a.split("_");
+                    if (data.length >= 2) {
+                        String name = data[0] + a.substring(a.lastIndexOf("."), a.length());
+                        if (SendFileRepository(
+                                new File(rutaPorProcesar + File.separator + a),
+                                rutaFileServer,
+                                name
+                        )) {                            
+                            if(SendDataFileRepository(data[0],rutaFileServer+"/"+data[0]+".zip",tipoFileSri)){
+                                moveFile(rutaPorProcesar + File.separator + a, rutaProcesado + File.separator + a);
+                            }
+                        }
                     }
                 } catch (Exception ex) {
                     LOGGER.log(Level.SEVERE, null, ex);
@@ -190,25 +181,54 @@ public class Main {
         }
     }
 
-    private static Boolean SendFileRepository(File source, String sSourceLocation) {
-        try (UnirestInstance unirest = Unirest.primaryInstance();){
+    private static Boolean SendFileRepository(File source, String sSourceLocation, String namefile) {
+        try ( UnirestInstance unirest = Unirest.primaryInstance();) {
             // no subo el archivo al servidor
             if (Integer.parseInt(Main.getPropiedad("urlServidorFileEnable")) == 0) {
                 return true;
             }
-            
+
             // It can be configured and used just like the static context
             unirest.config().socketTimeout(60000).connectTimeout(60000);
-            
+
             System.out.println("---------------" + source.getName());
             System.out.println("---------------" + Main.getPropiedad("urlServidorFile"));
             System.out.println("---------------" + sSourceLocation);
-            
+            System.out.println("---------------" + namefile);
+
             HttpResponse<String> response_ = unirest.post(Main.getPropiedad("urlServidorFile"))
                     .field("file", source)
                     //.field("file", new File("/C:/Users/USUARIO/Downloads/AZUAY/AZUAY-v1.txt"))
-                    .field("fileName", source.getName())
+                    .field("fileName", namefile)
                     .field("filePath", sSourceLocation)
+                    .asString();
+
+            System.out.println("---------------" + response_.getStatus());
+            if (response_.getStatus() == 200 || response_.getStatus() == 201) {
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+
+            LOGGER.log(Level.SEVERE, null, e);
+            return false;
+        }
+    }
+
+    private static Boolean SendDataFileRepository(String idFile, String namefile, Integer tipoFileSri) {
+        try ( UnirestInstance unirest = Unirest.primaryInstance();) {
+
+            // It can be configured and used just like the static context
+            unirest.config().socketTimeout(60000).connectTimeout(60000);
+
+            System.out.println("---------------" + idFile);
+            System.out.println("---------------" + Main.getPropiedad("urlApiData"));
+            System.out.println("---------------" + tipoFileSri);
+            System.out.println("---------------" + namefile);
+
+            HttpResponse<String> response_ = unirest.post(Main.getPropiedad("urlApiData"))
+                    .header("Content-Type", "application/json")
+                    .body("{ \"idFileSri\": \""+idFile+"\", \"nameFile\": \""+namefile+"\",  \"tipoFileSriId\": "+tipoFileSri+"}")
                     .asString();
 
             System.out.println("---------------" + response_.getStatus());
