@@ -93,6 +93,22 @@ public class Main {
                 Main.getPropiedad("urlServidorFileAgenteRetencion"),
                 Integer.parseInt(Main.getPropiedad("urlApiDataTipoAgenteRetencion"))
         );
+        
+        init(
+                Main.getPropiedad("rutaFuenteEmpresaExportadoraBienes"),
+                Main.getPropiedad("rutaPorProcesarEmpresaExportadoraBienes"),
+                Main.getPropiedad("rutaProcesadoEmpresaExportadoraBienes"),
+                Main.getPropiedad("urlServidorFileEmpresaExportadoraBienes"),
+                Integer.parseInt(Main.getPropiedad("urlApiDataTipoEmpresaExportadoraBienes"))
+        );
+        
+        init(
+                Main.getPropiedad("rutaFuenteEmpresaFantasma"),
+                Main.getPropiedad("rutaPorProcesarEmpresaFantasman"),
+                Main.getPropiedad("rutaProcesadoEmpresaFantasma"),
+                Main.getPropiedad("urlServidorFileEmrpesaFantasma"),
+                Integer.parseInt(Main.getPropiedad("urlApiDataTipoEmpresaFantasta"))
+        );
 
     }
 
