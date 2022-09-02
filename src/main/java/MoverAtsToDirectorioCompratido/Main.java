@@ -76,14 +76,25 @@ public class Main {
         return prop.getProperty(propertie);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
-        init(
+        
+        
+        
+        DesacargaFileSri.init();
+        
+        MoverCarpetas.copy(Main.getPropiedad("rutaDescargaFileSriCatastros"), Main.getPropiedad("rutaFuenteCatastros"));
+        MoverCarpetas.copy(Main.getPropiedad("rutaDescargaFileSriAgenteRetencion"), Main.getPropiedad("rutaFuenteAgenteRetencion"));
+        MoverCarpetas.copy(Main.getPropiedad("rutaDescargaFileSriEmpresaExportadoraBienes"), Main.getPropiedad("rutaFuenteEmpresaExportadoraBienes"));
+        MoverCarpetas.copy(Main.getPropiedad("rutaDescargaFileSriEmpresaFantasma"), Main.getPropiedad("rutaFuenteEmpresaFantasma"));
+      
+       init(
                 Main.getPropiedad("rutaFuenteCatastros"),
                 Main.getPropiedad("rutaPorProcesarCatastros"),
                 Main.getPropiedad("rutaProcesadoCatastros"),
                 Main.getPropiedad("urlServidorFileCatastros"),
-                Integer.parseInt(Main.getPropiedad("urlApiDataTipoCatastro"))
+                Integer.parseInt(Main.getPropiedad("urlApiDataTipoCatastro")),
+                Main.getPropiedad("urlServidorFile")
         );
 
         init(
@@ -91,7 +102,8 @@ public class Main {
                 Main.getPropiedad("rutaPorProcesarAgenteRetencion"),
                 Main.getPropiedad("rutaProcesadoAgenteRetencion"),
                 Main.getPropiedad("urlServidorFileAgenteRetencion"),
-                Integer.parseInt(Main.getPropiedad("urlApiDataTipoAgenteRetencion"))
+                Integer.parseInt(Main.getPropiedad("urlApiDataTipoAgenteRetencion")),
+                Main.getPropiedad("urlServidorFileZip")
         );
         
         init(
@@ -99,7 +111,8 @@ public class Main {
                 Main.getPropiedad("rutaPorProcesarEmpresaExportadoraBienes"),
                 Main.getPropiedad("rutaProcesadoEmpresaExportadoraBienes"),
                 Main.getPropiedad("urlServidorFileEmpresaExportadoraBienes"),
-                Integer.parseInt(Main.getPropiedad("urlApiDataTipoEmpresaExportadoraBienes"))
+                Integer.parseInt(Main.getPropiedad("urlApiDataTipoEmpresaExportadoraBienes")),
+                Main.getPropiedad("urlServidorFileZip")
         );
         
         init(
@@ -107,7 +120,8 @@ public class Main {
                 Main.getPropiedad("rutaPorProcesarEmpresaFantasman"),
                 Main.getPropiedad("rutaProcesadoEmpresaFantasma"),
                 Main.getPropiedad("urlServidorFileEmrpesaFantasma"),
-                Integer.parseInt(Main.getPropiedad("urlApiDataTipoEmpresaFantasta"))
+                Integer.parseInt(Main.getPropiedad("urlApiDataTipoEmpresaFantasta")),
+                Main.getPropiedad("urlServidorFileZip")
         );
 
     }
@@ -117,7 +131,8 @@ public class Main {
             String rutaPorProcesar,
             String rutaProcesado,
             String rutaFileServer,
-            Integer tipoFileSri
+            Integer tipoFileSri,
+            String urlServer
     ) {
 
         System.out.println("rutaFuente=" + rutaFuente);
@@ -138,11 +153,13 @@ public class Main {
                 rutaPorProcesar,
                 rutaProcesado,
                 rutaFileServer,
-                tipoFileSri
+                tipoFileSri,
+                urlServer
         );
     }
 
-    public static void loadFile(String rutaPorProcesar, String rutaProcesado, String rutaFileServer, Integer tipoFileSri ) {
+    public static void loadFile(String rutaPorProcesar, String rutaProcesado, String rutaFileServer, Integer tipoFileSri,
+            String urlServer ) {
         try {
             Set<String> lista = listFilesUsingFileWalkAndVisitor(rutaPorProcesar);
 
@@ -155,7 +172,8 @@ public class Main {
                         if (SendFileRepository(
                                 new File(rutaPorProcesar + File.separator + a),
                                 rutaFileServer,
-                                name
+                                name,
+                                urlServer
                         )) {                            
                             if(SendDataFileRepository(data[0],rutaFileServer+"/"+data[0]+".zip",tipoFileSri)){
                                 moveFile(rutaPorProcesar + File.separator + a, rutaProcesado + File.separator + a);
@@ -197,7 +215,7 @@ public class Main {
         }
     }
 
-    private static Boolean SendFileRepository(File source, String sSourceLocation, String namefile) {
+    private static Boolean SendFileRepository(File source, String sSourceLocation, String namefile, String urlServe) {
         try ( UnirestInstance unirest = Unirest.primaryInstance();) {
             // no subo el archivo al servidor
             if (Integer.parseInt(Main.getPropiedad("urlServidorFileEnable")) == 0) {
@@ -208,11 +226,11 @@ public class Main {
             unirest.config().socketTimeout(60000).connectTimeout(60000);
 
             System.out.println("---------------" + source.getName());
-            System.out.println("---------------" + Main.getPropiedad("urlServidorFile"));
+            System.out.println("---------------" + urlServe);
             System.out.println("---------------" + sSourceLocation);
             System.out.println("---------------" + namefile);
 
-            HttpResponse<String> response_ = unirest.post(Main.getPropiedad("urlServidorFile"))
+            HttpResponse<String> response_ = unirest.post(urlServe)
                     .field("file", source)
                     //.field("file", new File("/C:/Users/USUARIO/Downloads/AZUAY/AZUAY-v1.txt"))
                     .field("fileName", namefile)

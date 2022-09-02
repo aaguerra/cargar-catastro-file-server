@@ -65,7 +65,7 @@ public class MoverCarpetas {
             return false;
         } else {
 
-            if (SendFileRepository(source, sSourceLocation, stargetLocation)) {
+            //if (SendFileRepository(source, sSourceLocation, stargetLocation)) {
                 if (Integer.parseInt(Main.getPropiedad("urlServidorFileEnable")) == 1) {
                     System.out.println("copyDirectory El archivo se movio correctamente 22: " + source.getName());
                     try (
@@ -86,9 +86,9 @@ public class MoverCarpetas {
                 } else {
                     return false;
                 }
-            } else {
+            /*} else {
                 return false;
-            }
+            }*/
         }
 
     }
